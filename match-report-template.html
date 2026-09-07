@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chelsea Match Report</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0a0a12;
+    color: #f2f2f5;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 480px;
+    background: #131320;
+    border: 1px solid #23233a;
+    border-radius: 16px;
+    padding: 24px 24px 28px;
+  }
+
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #7a7a8c;
+    margin-bottom: 20px;
+  }
+
+  .scoreline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .team {
+    flex: 1;
+    text-align: center;
+  }
+
+  .team-name {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+  }
+
+  .team.home .team-name { color: #ff5a3c; }
+  .team.away .team-name { color: #4da3ff; }
+
+  .team-xg {
+    font-size: 12px;
+    color: #7a7a8c;
+    margin-top: 4px;
+  }
+
+  .score {
+    font-size: 40px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    padding: 0 16px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stats { display: flex; flex-direction: column; gap: 18px; }
+
+  .stat-row .labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  .stat-row .home-val { color: #ff5a3c; }
+  .stat-row .away-val { color: #4da3ff; }
+
+  .stat-row .stat-name {
+    color: #7a7a8c;
+    font-weight: 500;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    align-self: center;
+  }
+
+  .bar {
+    display: flex;
+    height: 8px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #1c1c2e;
+  }
+
+  .bar .home-fill { background: #ff5a3c; }
+  .bar .away-fill { background: #4da3ff; }
+  .bar .gap { width: 2px; background: #0a0a12; }
+
+  .footer {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #23233a;
+    font-size: 11px;
+    color: #4c4c5e;
+    text-align: center;
+    letter-spacing: 0.03em;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="meta">
+    <span id="competition">Premier League, MW38</span>
+    <span>Full time</span>
+  </div>
+
+  <div class="scoreline">
+    <div class="team home">
+      <div class="team-name" id="home-name">Sunderland</div>
+      <div class="team-xg" id="home-xg-label">xG 1.95</div>
+    </div>
+    <div class="score" id="score">2&ndash;1</div>
+    <div class="team away">
+      <div class="team-name" id="away-name">Chelsea</div>
+      <div class="team-xg" id="away-xg-label">xG 0.89</div>
+    </div>
+  </div>
+
+  <div class="stats" id="stat-rows"></div>
+
+  <div class="footer">the data-base &middot; @CFCAnalytic</div>
+</div>
+
+<script>
+  // Edit this block for each match, everything below draws itself
+  const match = {
+    competition: 'Premier League, MW38',
+    home: 'Sunderland',
+    away: 'Chelsea',
+    homeScore: 2,
+    awayScore: 1,
+    stats: [
+      { label: 'xG', home: 1.95, away: 0.89 },
+      { label: 'Possession', home: 44, away: 56, suffix: '%' },
+      { label: 'Shots (on target)', home: 21, away: 8, homeLabel: '21 (6)', awayLabel: '8 (3)' },
+      { label: 'Big chances', home: 2, away: 2 },
+      { label: 'Big chances missed', home: 2, away: 2 }
+    ]
+  };
+
+  document.getElementById('competition').textContent = match.competition;
+  document.getElementById('home-name').textContent = match.home;
+  document.getElementById('away-name').textContent = match.away;
+  document.getElementById('score').innerHTML = `${match.homeScore}&ndash;${match.awayScore}`;
+
+  const xgRow = match.stats.find(s => s.label === 'xG');
+  if (xgRow) {
+    document.getElementById('home-xg-label').textContent = `xG ${xgRow.home}`;
+    document.getElementById('away-xg-label').textContent = `xG ${xgRow.away}`;
+  }
+
+  const container = document.getElementById('stat-rows');
+  match.stats.forEach(s => {
+    const total = (s.home + s.away) || 1;
+    const homePct = (s.home / total) * 100;
+    const awayPct = (s.away / total) * 100;
+
+    const row = document.createElement('div');
+    row.className = 'stat-row';
+    row.innerHTML = `
+      <div class="labels">
+        <span class="home-val">${s.homeLabel ?? s.home + (s.suffix ?? '')}</span>
+        <span class="stat-name">${s.label}</span>
+        <span class="away-val">${s.awayLabel ?? s.away + (s.suffix ?? '')}</span>
+      </div>
+      <div class="bar">
+        <div class="home-fill" style="width:${homePct}%"></div>
+        <div class="gap"></div>
+        <div class="away-fill" style="width:${awayPct}%"></div>
+      </div>
+    `;
+    container.appendChild(row);
+  });
+</script>
+
+</body>
+</html>
